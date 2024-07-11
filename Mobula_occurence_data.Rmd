@@ -8,18 +8,17 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(janitor)
 ```
 
 ```{r}
-Mobula_occurrence<-read.csv("Data/gbif_manta_ray_simple.csv", sep = "\t")
+Mobula_occurrence<-read.csv("Data/gbif_manta_ray_simple.csv", sep = "\t") %>% 
+  clean_names()
 Mobula_occurrence
 ```
 ```{r}
 Mobula_selected <- Mobula_occurrence %>% 
-  select("scientificName", "occurrenceStatus", "individualCount", "decimalLatitude", "decimalLongitude", "coordinateUncertaintyInMeters", "coordinatePrecision", "depth", "depthAccuracy", "eventDate", "year", "basisOfRecord")
+  select("decimal_latitude", "decimal_longitude", "basis_of_record") #basisOfRecord has 3 different types of observations(Human, Preserved Specimen, Machine): can include this in methods
 ```
 
-```{r}
-Mobula_selected
-```
 
