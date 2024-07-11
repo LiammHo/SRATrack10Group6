@@ -27,7 +27,7 @@ dataset
 ```
 
 ```{r}
-#trying to import the max ocean temperature
+#importing the max ocean temperature
 info_layer("thetao_baseline_2000_2019_depthmax") #looking at the layers of oceantemp max
 dataset_id <- "thetao_baseline_2000_2019_depthmax"
 latitude = c(-89.975, 89.975)
@@ -37,15 +37,32 @@ constraints = list(latitude, longitude)
 names(constraints) = c("latitude", "longitude")
 variables = c("thetao_mean") #choosing the mean of the max temperature 
 max_ocean_temp <- download_layers(dataset_id, variables, constraints)
+
+#importing the mean ocean temperature 
+
+#importing the min ocean temperature 
+
+#importing the mean salinity
+
+#importing the mean TotalPhytoplankton
+
+#importing the mean depth 
+
+#importing the mean chlorophyll
+
+
+
+
+
 ```
+
+
 ```{r}
-#try to load in the max temp raster to see if it works <- using the star package
-library(stars)
 ggplot() +
-  geom_stars(data = max_ocean_temp) + #loading the raster data 
-  coord_equal() + # making all the coordinates equal | makes x and y axis the same length
-  theme_bw() + #giving it a black white theme
-  scale_fill_viridis_c() #making the colors viridis 
+  geom_sf(data = , color = "red") + #plotting the dots but with no map
+  geom_sf(data = ch, fill = "transparent") + # making a grid that is transparent 
+  theme_bw() +
+  theme(panel.grid = element_blank()) # get rid of the slightly transparent lines in the background 
 
 ```
 
