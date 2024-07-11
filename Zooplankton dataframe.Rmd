@@ -12,20 +12,58 @@ library(tidyverse)
 
 
 ```{r}
+#read the csv
 Zooplankton_read<-read.csv("Data/Zooplankton data.csv")
 Zooplankton_read
 ```
 
 ```{r}
-Zooplankton_vector_year<-as.vector(Zooplankton_read[,"YEAR"])
-Zooplankton_vector_year  
+#took out all columns we didn't want
+Zooplankton_read$SHP.CRUISE <-NULL
+Zooplankton_read$DAY <-NULL
+Zooplankton_read$TIMEgmt <-NULL
+Zooplankton_read$TIMEloc <-NULL
+Zooplankton_read$UPPER_Z <-NULL
+Zooplankton_read$LOWER_Z <-NULL
+Zooplankton_read$T <-NULL
+Zooplankton_read$GEAR <-NULL
+Zooplankton_read$NMFS_PGC <-NULL
+Zooplankton_read$ITIS_TSN <-NULL
+Zooplankton_read$MOD <-NULL
+Zooplankton_read$PSC <-NULL
+Zooplankton_read$SEX <-NULL
+Zooplankton_read$V <-NULL
+Zooplankton_read$Water.Strained <-NULL
+Zooplankton_read$Original.VALUE <-NULL
+Zooplankton_read$F1 <-NULL
+Zooplankton_read$F2 <-NULL
+Zooplankton_read$F3 <-NULL
+Zooplankton_read$F4 <-NULL
+Zooplankton_read$VALUE.per.area <-NULL
+Zooplankton_read$UNITS.1 <-NULL
+Zooplankton_read$F1.1 <-NULL
+Zooplankton_read$F2.1 <-NULL
+Zooplankton_read$F3.1 <-NULL
+Zooplankton_read$F4.1 <-NULL
+Zooplankton_read$RECORD.ID <-NULL
+Zooplankton_read$DATASET.ID <-NULL
+Zooplankton_read$SHIP <-NULL
+Zooplankton_read$PROJ <-NULL
+Zooplankton_read$INST <-NULL
+Zooplankton_read$Noname <-NULL
+Zooplankton_read$Noname2 <-NULL
+Zooplankton_read$Noname3 <-NULL
+Zooplankton_read$Noname4 <-NULL
+Zooplankton_read$NoName5 <-NULL
+Zooplankton_read$X <-NULL
+
+Zooplankton_read
 ```
 ```{r}
-Zooplankton_vector_latitude<-as.vector(Zooplankton_read[,"LATITUDE"])
-Zooplankton_vector_longitude <-as.vector(Zooplankton_read[,"LONGITDE"])
+#filtered by SCIENTIFIC.NAME....modifiers...
+Zooplankton_wet <- Zooplankton_read %>% 
+  filter(SCIENTIFIC.NAME....modifiers... == "Zooplankton wet weight -[ ]-")
+Zooplankton_wet
 ```
 
-```{r}
-?matrix
-```
 
