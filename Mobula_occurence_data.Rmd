@@ -1,0 +1,25 @@
+---
+title: "Manta ray gbif"
+author: "Ivy Zhou"
+date: "2024-07-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+Mobula_occurrence<-read.csv("Data/gbif_manta_ray_simple.csv", sep = "\t")
+Mobula_occurrence
+```
+```{r}
+Mobula_selected <- Mobula_occurrence %>% 
+  select("scientificName", "occurrenceStatus", "individualCount", "decimalLatitude", "decimalLongitude", "coordinateUncertaintyInMeters", "coordinatePrecision", "depth", "depthAccuracy", "eventDate", "year", "basisOfRecord")
+```
+
+```{r}
+Mobula_selected
+```
+
