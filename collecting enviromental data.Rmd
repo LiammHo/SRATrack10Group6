@@ -16,6 +16,7 @@ library(tidyverse)
 library(sdmpredictors)
 library(raster)
 library(sp)
+library(terra)
 ```
 
 ```{r}
@@ -27,44 +28,65 @@ dataset
 ```
 
 ```{r}
-#importing the max ocean temperature
-info_layer("thetao_baseline_2000_2019_depthmax") #looking at the layers of oceantemp max
-dataset_id <- "thetao_baseline_2000_2019_depthmax"
 latitude = c(-89.975, 89.975)
 longitude = c(-179.975, 179.975)
-
 constraints = list(latitude, longitude)
 names(constraints) = c("latitude", "longitude")
-variables = c("thetao_mean") #choosing the mean of the max temperature 
-max_ocean_temp <- download_layers(dataset_id, variables, constraints)
-
-#importing the mean ocean temperature 
-
-#importing the min ocean temperature 
-
-#importing the mean salinity
-
-#importing the mean TotalPhytoplankton
-
-#importing the mean depth 
-
-#importing the mean chlorophyll
-
-
-
-
-
 ```
-
 
 ```{r}
-ggplot() +
-  geom_sf(data = , color = "red") + #plotting the dots but with no map
-  geom_sf(data = ch, fill = "transparent") + # making a grid that is transparent 
-  theme_bw() +
-  theme(panel.grid = element_blank()) # get rid of the slightly transparent lines in the background 
-
+#importing the max ocean temperature
+dataset_id1 <- "thetao_baseline_2000_2019_depthmax"
+variables = c("thetao_mean") #choosing the mean of the max temperature 
+max_ocean_temp <- download_layers(dataset_id, variables, constraints)
+```
+```{r}
+#importing the mean ocean temperature
+dataset_id1 <- "thetao_baseline_2000_2019_depthmean"
+variables = c("thetao_mean") #choosing the mean of the mean temperature 
+mean_ocean_temp <- download_layers(dataset_id1, variables, constraints)
 ```
 
+```{r}
+#importing the min ocean temperature 
+dataset_id2 <- "thetao_baseline_2000_2019_depthmin"
+variables = c("thetao_mean") #choosing the mean of the min temperature 
+min_ocean_temp <- download_layers(dataset_id2, variables, constraints)
+```
 
+```{r}
+#importing the mean salinity
+dataset_id3<- "so_baseline_2000_2019_depthmean"
+variables = c("so_mean") #choosing the mean of salinity
+salinity <- download_layers(dataset_id3, variables, constraints)
+```
 
+```{r}
+#importing the mean TotalPhytoplankton
+dataset_id4 <- "phyc_baseline_2000_2020_depthmean"
+variables = c("phyc_mean") #choosing the mean of TotalPhytoplankton <- can be rep of primary productivity
+totalphytoplankton <- download_layers(dataset_id4, variables, constraints)
+```
+
+```{r}
+#importing the mean pH
+dataset_id5 <- "ph_baseline_2000_2018_depthmean"
+variables = c("ph_mean") #choosing the mean of pH
+ph <- download_layers(dataset_id5, variables, constraints)
+```
+
+```{r}
+#importing the mean chlorophyll
+dataset_id6 <- "chl_baseline_2000_2018_depthmean"
+variables = c("chl_mean") #choosing the mean of chlorophyll
+chlorophyll <- download_layers(dataset_id6, variables, constraints)
+```
+
+```{r}
+#importing the MixedLayerDepth
+dataset_id7 <- "mlotst_baseline_2000_2019_depthsurf "
+variables = c("mlotst_mean") #choosing the mean of MixedLayerDepth
+mixedlayerdepth <- download_layers(dataset_id7, variables, constraints)
+```
+
+Can plot(variable) <- to see the current data
