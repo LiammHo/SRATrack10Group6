@@ -1,0 +1,15 @@
+---
+title: "Manta ray simple"
+author: "Ivy Zhou"
+date: "2024-07-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+read.csv("Data/gbif_manta_ray_simple.csv", sep = "\t")
+```
+
