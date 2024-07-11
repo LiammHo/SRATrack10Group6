@@ -7,17 +7,25 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
+library(tidyverse)
 ```
 
 
 ```{r}
-read.csv("Data/Zooplankton data.csv")
+Zooplankton_read<-read.csv("Data/Zooplankton data.csv")
+Zooplankton_read
 ```
 
 ```{r}
-hi
+Zooplankton_vector_year<-as.vector(Zooplankton_read[,"YEAR"])
+Zooplankton_vector_year  
+```
+```{r}
+Zooplankton_vector_latitude<-as.vector(Zooplankton_read[,"LATITUDE"])
+Zooplankton_vector_longitude <-as.vector(Zooplankton_read[,"LONGITDE"])
+```
+
+```{r}
+?matrix
 ```
 
