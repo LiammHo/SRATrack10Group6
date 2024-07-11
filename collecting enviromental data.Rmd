@@ -16,7 +16,6 @@ library(tidyverse)
 library(sdmpredictors)
 library(raster)
 library(sp)
-library(dismo)
 ```
 
 ```{r}
