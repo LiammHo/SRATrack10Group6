@@ -19,14 +19,32 @@ Mobula_occurrence
 ```
 ```{r}
 Mobula_selected <- Mobula_occurrence %>% 
-  select("decimal_latitude", "decimal_longitude", "basis_of_record") #basisOfRecord has 4 different types of observations(Human, Preserved Specimen, Machine): can include this in methods
+  select("decimal_latitude", "decimal_longitude", "basis_of_record") 
+#basisOfRecord has 4 different types of observations(Human, Preserved Specimen, Machine): can include this in methods
 ```
 
 ```{r}
 write_csv(Mobula_selected, file = here("data", "manta.csv")) #how to export datasets into csv files
 ```
 
+```{r}
+Manta_coordinates <- Mobula_selected %>%
+  select("decimal_latitude", "decimal_longitude")
+```
 
 
+```{r}
+Manta_complete <- na.omit(Manta_coordinates)
+```
+
+
+```{r}
+write_csv(Manta_coordinates, file = here("data", "manta_coordinates.csv"))
+```
+
+
+```{r}
+write_csv(Manta_complete, file = here("data", "manta_complete.csv"))
+```
 
 

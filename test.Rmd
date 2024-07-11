@@ -7,7 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+ #install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
+
+library(sf)
+library(terra)
+library(spData)
+library(spDataLarge)
 library(tidyverse)
+library(stars)
+library(patchwork)
 ```
 
 ```{r}
@@ -15,9 +23,6 @@ ch_mean = ch_extract %>%
   summarize(mean_latitude = mean(decimal_latitude, na.rm = TRUE)) %>% 
   full_join(ch) %>% 
   st_as_sf() #turning data that you created into an sf object so you can use it to plot a map
-```
-```{r}
-?full_join
 ```
 
 ```{r}
@@ -28,3 +33,35 @@ ch_mean = ch_extract %>%
   st_as_sf() #turning data that you created into an sf object so you can use it to plot a map
 ```
 
+
+### Raster and Vector Operations
+
+
+####read_sf reads shape files, while rast() reads raster files.
+
+### Maps in R
+
+## plotting vector data
+```{r}
+plot_locations_Manta <- st_as_sf(Manta_complete, coords = c( 1, 2)) 
+
+Manta_crs <- plot_locations_Manta %>% 
+  st_set_crs("NAD83")
+ 
+#set crs to NAD83
+```
+```{r}
+st_crs(Manta_crs)
+```
+```{r}
+plot_locations_Manta
+```
+
+
+```{r}
+ggplot() +
+  geom_sf(data = plot_locations_Manta, color = "green") + #has points according to lat and lon
+  #geom_sf(data = ch, fill = "transparent") + #creates grid
+  theme_bw() 
+  #theme(panel.grid = element_blank()) #remove line from standard ggplot graph
+```
