@@ -19,9 +19,35 @@ library(sp)
 ```
 
 ```{r}
+#listing all of the different variables 
+library(biooracler)
 
+dataset <- list_layers()
+dataset
 ```
 
+```{r}
+#trying to import the max ocean temperature
+info_layer("thetao_baseline_2000_2019_depthmax") #looking at the layers of oceantemp max
+dataset_id <- "thetao_baseline_2000_2019_depthmax"
+latitude = c(-89.975, 89.975)
+longitude = c(-179.975, 179.975)
+
+constraints = list(latitude, longitude)
+names(constraints) = c("latitude", "longitude")
+variables = c("thetao_mean") #choosing the mean of the max temperature 
+max_ocean_temp <- download_layers(dataset_id, variables, constraints)
+```
+```{r}
+#try to load in the max temp raster to see if it works <- using the star package
+library(stars)
+ggplot() +
+  geom_stars(data = max_ocean_temp) + #loading the raster data 
+  coord_equal() + # making all the coordinates equal | makes x and y axis the same length
+  theme_bw() + #giving it a black white theme
+  scale_fill_viridis_c() #making the colors viridis 
+
+```
 
 
 
