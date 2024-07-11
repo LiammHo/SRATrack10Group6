@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
+library(here)
 ```
 
 
@@ -22,5 +23,8 @@ Zooplankton_wet<-read.csv("Data/Zooplankton data.csv") %>%
 Zooplankton_wet
 ```
 
+```{r}
+write.csv(Zooplankton_wet, here("data", "Zooplankton.csv")) #how to export datasets into csv files
+```
 
 #website to learn how to remove columns in r: https://favtutor.com/blogs/remove-column-r

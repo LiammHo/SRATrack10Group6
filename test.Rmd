@@ -1,0 +1,30 @@
+---
+title: "test"
+author: "Ivy Zhou"
+date: "2024-07-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+ch_mean = ch_extract %>% 
+  summarize(mean_latitude = mean(decimal_latitude, na.rm = TRUE)) %>% 
+  full_join(ch) %>% 
+  st_as_sf() #turning data that you created into an sf object so you can use it to plot a map
+```
+```{r}
+?full_join
+```
+
+```{r}
+ch_mean = ch_extract %>% 
+  group_by(ID) %>% 
+  summarize(mean_srtm = mean(srtm, na.rm = TRUE)) %>% 
+  full_join(ch) %>% 
+  st_as_sf() #turning data that you created into an sf object so you can use it to plot a map
+```
+
