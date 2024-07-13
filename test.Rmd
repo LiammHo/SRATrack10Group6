@@ -66,3 +66,28 @@ ggplot() +
   theme_bw() 
   #theme(panel.grid = element_blank()) #remove line from standard ggplot graph
 ```
+```{r}
+library(raster)
+library(rasterVis)
+
+csv_path <- "file.csv"
+csv_file <- paste(csv_path, sep="")
+temp <- read.csv(csv_file) # takes a while
+str(temp)
+temp_coords <- cbind(temp$lon, temp$lat)
+temp_pts <- SpatialPointsDataFrame(coords=temp_coords, 
+data=data.frame(temp$temp))
+names(temp_pts) <- "temp"
+
+cell_size <- 0.75
+lon_min <- -125.0; lon_max <- -65.0; lat_min <- 25.5; lat_max <- 50.5
+ncols <- ((lon_max - lon_min)/cell_size)+1; nrows <- ((lat_max - lat_min)/cell_size)+1 
+gridtemp <- raster(nrows=nrows, ncols=ncols, xmn=lon_min, xmx=lon_max, ymn=lat_min, ymx=lat_max, res=cell_size, crs="+proj=longlat +datum=WGS84")
+gridtemp
+
+us_fire <- rasterize(temp_coords, gridtemp, fun=mean)
+us_fire
+
+plot(us_fire, col=brewer.pal(9,"PuBuGn"), sub="CSV2RASTER")
+```
+
