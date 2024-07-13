@@ -84,7 +84,7 @@ chlorophyll <- download_layers(dataset_id6, variables, constraints)
 
 ```{r}
 #importing the MixedLayerDepth
-dataset_id7 <- "mlotst_baseline_2000_2019_depthsurf "
+dataset_id7 <- "mlotst_baseline_2000_2019_depthsurf"
 variables = c("mlotst_mean") #choosing the mean of MixedLayerDepth
 mixedlayerdepth <- download_layers(dataset_id7, variables, constraints)
 ```
