@@ -17,7 +17,6 @@ library(raster)
 library(sp)
 library(terra)
 library(sf)
-library(stars)
 ```
 
 ```{r}
@@ -91,45 +90,19 @@ data <- st_sf(id = 1:nrows, geometry = st_sfc(lapply(1:nrows, function(x) st_geo
 ```{r}
 #setting the coordinate system of the empty shape file to be the same
 all_data = data %>%
-  st_set_crs("EPSG:4326")
+  st_set_crs("WGS84")
 
 #reading in the manta ray shape rile 
 manta_data <- st_read("Data/manta_crs.shp") %>%
-  st_set_crs("EPSG:4326")
+  st_set_crs("WGS84")
 ```
+
 ```{r}
 #setting the max ocean temp crs to be the same
-mean_temp <- project(mean_ocean_temp,
+max_temp <- project(max_ocean_temp,
                                  crs(manta_data))
-temp = terra::extract(x = mean_ocean_temp,y = manta_data)
-```
 
-```{r}
-temp_filtered = temp %>%
-  filter(thetao_mean_1 > 0 & thetao_mean_2 > 0)
-```
-
-
-```{r}
-ggplot() +
-  geom_sf(data = manta_data , color = "red") + #plotting the dots but with no map
-  geom_sf(data = ch, fill = "transparent") + # making a grid that is transparent 
-  theme_bw() +
-  theme(panel.grid = element_blank()) # get rid of the slightly transparent lines in the background 
-```
-
-```{r}
-mean_temp_stars <- st_as_stars(mean_ocean_temp)
-
-# Plotting the points and the raster together
-ggplot() +
-  geom_stars(data = mean_temp_stars) + # Loading the raster data 
-  coord_sf() + # Using coord_sf for sf objects
-  geom_sf(data = manta_data, color = "red") + # Plotting the manta ray points
-  theme_bw() + # Giving it a black and white theme
-  scale_fill_viridis_c() + # Making the colors viridis
-  labs(title = "Max Ocean Temperature and Manta Ray Occurrence Points",
-       fill = "Temperature (°C)")
+max_temp1 = terra::extract(x = max_temp,y = manta_data)
 ```
 
 
