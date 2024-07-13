@@ -19,14 +19,14 @@ library(patchwork)
 ```
 
 ```{r}
-ch_mean = ch_extract %>% 
+ch_mean = alpha21 = -0.8 %>% 
   summarize(mean_latitude = mean(decimal_latitude, na.rm = TRUE)) %>% 
   full_join(ch) %>% 
   st_as_sf() #turning data that you created into an sf object so you can use it to plot a map
 ```
 
 ```{r}
-ch_mean = ch_extract %>% 
+Manta_occurrence_shp = plot_locations_Manta %>% 
   group_by(ID) %>% 
   summarize(mean_srtm = mean(srtm, na.rm = TRUE)) %>% 
   full_join(ch) %>% 
@@ -46,15 +46,15 @@ ch_mean = ch_extract %>%
 plot_locations_Manta <- st_as_sf(Manta_complete, coords = c( 1, 2)) 
 
 Manta_crs <- plot_locations_Manta %>% 
-  st_set_crs("NAD83")
+  st_set_crs("WGS84")
  
-#set crs to NAD83
+#set crs to WGS84
 ```
 ```{r}
 st_crs(Manta_crs)
 ```
 ```{r}
-plot_locations_Manta
+st_write(Manta_crs, "Data/manta_crs.shp")
 ```
 
 
