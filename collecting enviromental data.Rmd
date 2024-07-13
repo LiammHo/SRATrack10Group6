@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r}
 #loading in the packages :D
 library(tidyverse)
@@ -17,6 +16,7 @@ library(sdmpredictors)
 library(raster)
 library(sp)
 library(terra)
+library(sf)
 ```
 
 ```{r}
@@ -36,10 +36,16 @@ names(constraints) = c("latitude", "longitude")
 
 ```{r}
 #importing the max ocean temperature
-dataset_id1 <- "thetao_baseline_2000_2019_depthmax"
+dataset_id <- "thetao_baseline_2000_2019_depthmax"
 variables = c("thetao_mean") #choosing the mean of the max temperature 
 max_ocean_temp <- download_layers(dataset_id, variables, constraints)
+
 ```
+```{r}
+st_crs(max_ocean_temp)
+```
+
+
 ```{r}
 #importing the mean ocean temperature
 dataset_id1 <- "thetao_baseline_2000_2019_depthmean"
