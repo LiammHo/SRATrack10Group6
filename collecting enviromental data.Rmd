@@ -39,12 +39,7 @@ names(constraints) = c("latitude", "longitude")
 dataset_id <- "thetao_baseline_2000_2019_depthmax"
 variables = c("thetao_mean") #choosing the mean of the max temperature 
 max_ocean_temp <- download_layers(dataset_id, variables, constraints)
-
 ```
-```{r}
-st_crs(max_ocean_temp)
-```
-
 
 ```{r}
 #importing the mean ocean temperature
@@ -96,3 +91,32 @@ mixedlayerdepth <- download_layers(dataset_id7, variables, constraints)
 ```
 
 Can plot(variable) <- to see the current data
+
+----------------------------------------------------------------------------------------------
+
+```{r}
+#making an empty shape file to push stuff into
+library(sf)
+nrows <- 10
+data <- st_sf(id = 1:nrows, geometry = st_sfc(lapply(1:nrows, function(x) st_geometrycollection())))
+```
+
+```{r}
+#setting the coordinate system of the empty shape file to be the same
+all_data = data %>%
+  st_set_crs("WGS84")
+
+#reading in the manta ray shape rile 
+manta_data <- st_read("Data/manta_crs.shp") %>%
+  st_set_crs("WGS84")
+```
+
+```{r}
+#setting the max ocean temp crs to be the same
+max_temp <- project(max_ocean_temp,
+                                 crs(manta_data))
+
+max_temp1 = terra::extract(x = max_temp,y = manta_data)
+```
+
+
