@@ -18,6 +18,8 @@ library(sp)
 library(terra)
 library(sf)
 library(stars)
+library(here)
+library(dplyr)
 ```
 
 ```{r}
@@ -93,7 +95,12 @@ manta_data <- st_read("Data/manta_crs.shp")
 ```
 ```{r}
 terra::crop(mean_ocean_temp, manta_data)
+
 ```
+```{r}
+terra::crop(salinity, manta_data)
+```
+
 
 
 ```{r}
@@ -109,10 +116,99 @@ temp <- temp %>%
 ```
 
 ```{r}
-
+terra::crop(salinity, manta_data)
 ```
 
 
+```{r}
+mean_salinity <- project(salinity,
+                                 crs(manta_data))
+salinity = terra::extract(x = salinity,y = manta_data)
+```
+
+```{r}
+salinity <- salinity %>%
+  filter(!is.na("so_mean_1") & !is.na("so_mean_2")) 
+```
+```{r}
+?str_split
+```
+
+```{r}
+write_csv(salinity, file = here("data", "salinity2.csv"))
+```
+
+
+```{r}
+terra::crop(totalphytoplankton, manta_data)
+```
+
+```{r}
+#setting the max ocean temp crs to be the same
+mean_totalphytoplankton <- project(totalphytoplankton,
+                                 crs(manta_data))
+totalphytoplankton = terra::extract(x = totalphytoplankton,y = manta_data)
+```
+
+```{r}
+totalphytoplankton <- totalphytoplankton %>%
+  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2))
+```
+
+```{r}
+terra::crop(ph, manta_data)
+```
+
+
+```{r}
+#setting the max ocean temp crs to be the same
+mean_ph <- project(ph,
+                                 crs(manta_data))
+ph = terra::extract(x = ph,y = manta_data)
+```
+
+```{r}
+ph <- ph %>%
+  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2))
+```
+
+```{r}
+terra::crop(chlorophyll, manta_data)
+```
+
+
+```{r}
+#setting the max ocean temp crs to be the same
+mean_chlorophyll <- project(chlorophyll,
+                                 crs(manta_data))
+chlorophyll = terra::extract(x = chlorophyll,y = manta_data)
+```
+
+```{r}
+chlorophyll <- chlorophyll %>%
+  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2))
+```
+
+```{r}
+terra::crop(MixedLayerDepth, manta_data)
+```
+
+
+```{r}
+#setting the max ocean temp crs to be the same
+mean_MixedLayerDepth <- project(MixedLayerDepth,
+                                 crs(manta_data))
+MixedLayerDepth = terra::extract(x = MixedLayerDepth,y = manta_data)
+```
+
+```{r}
+MixedLayerDepth <- MixedLayerDepth %>%
+  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2))
+```
+
+```{r}
+
+```
 
 ```{r}
 temp_sf <- st_as_sf(temp, coords = c("longitude", "latitude"), crs = 4326)
@@ -127,5 +223,4 @@ p1 <- ggplot(temp_sf) +
 # Display the plot
 print(p1)
 ```
-
 
