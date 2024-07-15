@@ -130,13 +130,6 @@ salinity = terra::extract(x = salinity,y = manta_data)
 salinity <- salinity %>%
   filter(!is.na("so_mean_1") & !is.na("so_mean_2")) 
 ```
-```{r}
-?str_split
-```
-
-```{r}
-write_csv(salinity, file = here("data", "salinity2.csv"))
-```
 
 
 ```{r}
@@ -222,5 +215,10 @@ p1 <- ggplot(temp_sf) +
 
 # Display the plot
 print(p1)
+```
+
+```{r}
+glm(formula = present ~ tmin + precip, family = binomial(link = "logit"), 
+     data = hooded_warb_data)
 ```
 

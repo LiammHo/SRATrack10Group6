@@ -1,0 +1,23 @@
+---
+title: "Exporting csv files"
+author: "Ivy Zhou"
+date: "2024-07-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sdmpredictors)
+library(raster)
+library(sp)
+library(terra)
+library(sf)
+library(stars)
+library(here)
+library(dplyr)
+```
+
+```{r}
+write_csv(salinity, file = here("data", "salinity2.csv"))
+```
