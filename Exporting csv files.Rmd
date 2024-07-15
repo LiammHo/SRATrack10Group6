@@ -21,3 +21,7 @@ library(dplyr)
 ```{r}
 write_csv(salinity, file = here("data", "salinity2.csv"))
 ```
+```{r}
+write_csv(ph, file = here("data", "ph.csv"))
+```
+
