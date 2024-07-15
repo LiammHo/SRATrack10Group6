@@ -35,7 +35,9 @@ mean_ocean_temp <- download_layers(dataset_id1, variables, constraints) #downloa
 
 ```{r}
 #reading in the manta data 
-manta_data <- st_read("Data/manta_crs.shp")
+manta_data <- st_read("Data/manta_crs.shp") %>% 
+  mutate(occurrenceStatus= "PRESENT") %>% 
+  select(occurrenceStatus)
 
 mean_ocean_temp <- project(mean_ocean_temp,
                                  crs(manta_data))
@@ -48,32 +50,37 @@ buffer_manta = st_buffer(manta_data, 5000)
 ```{r}
 mean_crop = crop(mean_ocean_temp, buffer_manta)
 ```
+
 ```{r}
 no_points = mask(mean_crop, buffer_manta, inverse=TRUE)
 ```
 
 ```{r}
-random_points = terra::spatSample(no_points, 20140, "random", na.rm=T, as.points=TRUE)
-```
-
-```{r}
-random_points %>%
+# takes a while, but you'll want to change the number to get close to the number of occurences you have
+random_points = terra::spatSample(no_points, 10000, "random", na.rm=T, as.points=TRUE) %>% 
   st_as_sf() %>% 
-  filter(mean_ocean_temp > 0)%>% 
+  filter(thetao_mean_2 > 0)%>% 
   mutate(occurrenceStatus = "ABSENT")%>% 
-  select(mean_ocean_temp, occurrenceStatus)
+  select(occurrenceStatus)
+
+print(class(random_points))
 ```
 
 ```{r}
-mean_extract = terra::extract(mean_ocean_temp, manta_data) %>% 
-  cbind(manta_data) %>% 
+# mean_extract = terra::extract(mean_ocean_temp, manta_data) %>% 
+#   cbind(manta_data) %>% 
+#   st_as_sf() %>% 
+#   select(mean_ocean_temp, occurrenceStatus)
+
+
+```
+
+```{r}
+model_data = rbind(random_points, manta_data)%>% 
   st_as_sf() %>% 
-  select(mean_ocean_temp, occurrenceStatus)
-```
+  as.data.frame(xy = TRUE)
 
-```{r}
-model_data = rbind(random_points, mean_extract)%>% 
-  st_as_sf()
+write_csv()
 
 ggplot(model_data) +
   geom_sf(aes(color = occurrenceStatus)) +

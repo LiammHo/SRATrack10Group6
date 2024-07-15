@@ -89,15 +89,17 @@ Can plot(variable) <- to see the current data
 ----------------------------------------------------------------------------------------------
 
 ```{r}
-#setting the coordinate system of the empty shape file to be the same
-
+#reading the manta data 
 manta_data <- st_read("Data/manta_crs.shp")
 ```
-```{r}
-terra::crop(mean_ocean_temp, manta_data)
 
-```
 ```{r}
+#cropping the mean temps to the manta data 
+terra::crop(mean_ocean_temp, manta_data)
+```
+
+```{r}
+#cropping the salinity to the manta data 
 terra::crop(salinity, manta_data)
 ```
 
