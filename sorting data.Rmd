@@ -1,0 +1,88 @@
+---
+title: "sorting data"
+author: "Katie Wang"
+date: "2024-07-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#loading in the packages :D
+library(tidyverse)
+library(sf)
+library(terra)
+library(biooracler)
+```
+
+```{r}
+#constraints
+latitude = c(-89.975, 89.975)
+longitude = c(-179.975, 179.975)
+constraints = list(latitude, longitude)
+names(constraints) = c("latitude", "longitude")
+```
+
+```{r}
+#importing the mean ocean temperature
+dataset_id1 <- "thetao_baseline_2000_2019_depthmean"
+variables = c("thetao_mean") #choosing the mean of the mean temperature 
+mean_ocean_temp <- download_layers(dataset_id1, variables, constraints) #downloading the specific manta data layer 
+
+```
+
+```{r}
+#reading in the manta data 
+manta_data <- st_read("Data/manta_crs.shp")
+
+mean_ocean_temp <- project(mean_ocean_temp,
+                                 crs(manta_data))
+```
+# Buffer ------------------------------------------------------------------
+```{r}
+buffer_manta = st_buffer(manta_data, 5000)
+```
+
+```{r}
+mean_crop = crop(mean_ocean_temp, buffer_manta)
+```
+```{r}
+no_points = mask(mean_crop, buffer_manta, inverse=TRUE)
+```
+
+```{r}
+random_points = terra::spatSample(no_points, 20140, "random", na.rm=T, as.points=TRUE)
+```
+
+```{r}
+random_points %>%
+  st_as_sf() %>% 
+  filter(mean_ocean_temp > 0)%>% 
+  mutate(occurrenceStatus = "ABSENT")%>% 
+  select(mean_ocean_temp, occurrenceStatus)
+```
+
+```{r}
+mean_extract = terra::extract(mean_ocean_temp, manta_data) %>% 
+  cbind(manta_data) %>% 
+  st_as_sf() %>% 
+  select(mean_ocean_temp, occurrenceStatus)
+```
+
+```{r}
+model_data = rbind(random_points, mean_extract)%>% 
+  st_as_sf()
+
+ggplot(model_data) +
+  geom_sf(aes(color = occurrenceStatus)) +
+  theme_bw()
+
+```
+
+
+
+
+
+

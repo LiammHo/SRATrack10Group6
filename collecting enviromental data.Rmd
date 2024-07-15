@@ -36,8 +36,13 @@ names(constraints) = c("latitude", "longitude")
 ```
 
 ```{r}
+info_layer("thetao_ssp119_2020_2100_depthmean")
+```
+
+
+```{r}
 #importing the mean ocean temperature
-dataset_id1 <- "thetao_baseline_2000_2019_depthmean"
+dataset_id1 <- "thetao_ssp119_2020_2100_depthmean"
 variables = c("thetao_mean") #choosing the mean of the mean temperature 
 mean_ocean_temp <- download_layers(dataset_id1, variables, constraints)
 ```
@@ -82,21 +87,15 @@ Can plot(variable) <- to see the current data
 ----------------------------------------------------------------------------------------------
 
 ```{r}
-#making an empty shape file to push stuff into
-library(sf)
-nrows <- 10
-data <- st_sf(id = 1:nrows, geometry = st_sfc(lapply(1:nrows, function(x) st_geometrycollection())))
-```
-
-```{r}
 #setting the coordinate system of the empty shape file to be the same
-all_data = data %>%
-  st_set_crs("EPSG:4326")
 
-#reading in the manta ray shape rile 
-manta_data <- st_read("Data/manta_crs.shp") %>%
-  st_set_crs("EPSG:4326")
+manta_data <- st_read("Data/manta_crs.shp")
 ```
+```{r}
+terra::crop(mean_ocean_temp, manta_data)
+```
+
+
 ```{r}
 #setting the max ocean temp crs to be the same
 mean_temp <- project(mean_ocean_temp,
@@ -105,31 +104,28 @@ temp = terra::extract(x = mean_ocean_temp,y = manta_data)
 ```
 
 ```{r}
-temp_filtered = temp %>%
-  filter(thetao_mean_1 > 0 & thetao_mean_2 > 0)
-```
-
-
-```{r}
-ggplot() +
-  geom_sf(data = manta_data , color = "red") + #plotting the dots but with no map
-  geom_sf(data = ch, fill = "transparent") + # making a grid that is transparent 
-  theme_bw() +
-  theme(panel.grid = element_blank()) # get rid of the slightly transparent lines in the background 
+temp <- temp %>%
+  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2))
 ```
 
 ```{r}
-mean_temp_stars <- st_as_stars(mean_ocean_temp)
 
-# Plotting the points and the raster together
-ggplot() +
-  geom_stars(data = mean_temp_stars) + # Loading the raster data 
-  coord_sf() + # Using coord_sf for sf objects
-  geom_sf(data = manta_data, color = "red") + # Plotting the manta ray points
-  theme_bw() + # Giving it a black and white theme
-  scale_fill_viridis_c() + # Making the colors viridis
-  labs(title = "Max Ocean Temperature and Manta Ray Occurrence Points",
-       fill = "Temperature (°C)")
+```
+
+
+
+```{r}
+temp_sf <- st_as_sf(temp, coords = c("longitude", "latitude"), crs = 4326)
+
+p1 <- ggplot(temp_sf) +
+  geom_sf(aes(fill = thetao_mean_1)) +
+  scale_fill_viridis_c(name = "Mean Temperature (°C)") +
+  labs(x = "Longitude", y = "Latitude", title = "Mean Temperature in Each MPA",
+       fill = "Mean Temperature") +
+  theme_minimal()
+
+# Display the plot
+print(p1)
 ```
 
 

@@ -43,13 +43,14 @@ Manta_occurrence_shp = plot_locations_Manta %>%
 
 ## plotting vector data
 ```{r}
-plot_locations_Manta <- st_as_sf(Manta_complete, coords = c( 1, 2)) 
+plot_locations_Manta <- st_as_sf(Manta_complete, coords = c(2, 1)) 
 
 Manta_crs <- plot_locations_Manta %>% 
-  st_set_crs("WGS84")
+  st_set_crs("EPSG:4326")
  
 #set crs to WGS84
 ```
+
 ```{r}
 st_crs(Manta_crs)
 ```
