@@ -21,7 +21,22 @@ library(dplyr)
 ```{r}
 write_csv(salinity, file = here("data", "salinity2.csv"))
 ```
+
+```{r}
+write_csv(totalphytoplankton, file = here("data", "totalphytoplankton.csv"))
+```
+
 ```{r}
 write_csv(ph, file = here("data", "ph.csv"))
 ```
+
+```{r}
+write_csv(chlorophyll, file = here("data", "chlorophyll.csv"))
+```
+
+```{r}
+write_csv(MixedLayerDepth, file = here("data", "MixedLayerDepth.csv"))
+```
+
+
 
