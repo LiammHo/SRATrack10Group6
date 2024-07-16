@@ -66,6 +66,7 @@ ggplot() +
   theme_bw() 
   #theme(panel.grid = element_blank()) #remove line from standard ggplot graph
 ```
+
 ```{r}
 library(raster)
 library(rasterVis)

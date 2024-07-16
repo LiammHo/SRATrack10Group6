@@ -87,7 +87,7 @@ Can plot(variable) <- to see the current data
 
 ```{r}
 #reading the manta data 
-manta_data <- st_read("Data/manta_csr.shp")
+manta_data <- st_read("Data/manta_crs.shp")
 ```
 
 

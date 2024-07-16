@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
-library(here)
 ```
 
 ```{r}
@@ -19,7 +18,7 @@ Mobula_occurrence
 ```
 ```{r}
 Mobula_selected <- Mobula_occurrence %>% 
-  select("decimal_latitude", "decimal_longitude", "basis_of_record") 
+  select(decimal_latitude, decimal_longitude, basis_of_record)
 #basisOfRecord has 4 different types of observations(Human, Preserved Specimen, Machine): can include this in methods
 ```
 
