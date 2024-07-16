@@ -42,6 +42,7 @@ manta_data <- st_read("Data/manta_crs.shp") %>%
 mean_ocean_temp <- project(mean_ocean_temp,
                                  crs(manta_data))
 ```
+
 # Buffer ------------------------------------------------------------------
 ```{r}
 buffer_manta = st_buffer(manta_data, 5000)

@@ -41,7 +41,6 @@ names(constraints) = c("latitude", "longitude")
 info_layer("thetao_ssp119_2020_2100_depthmean")
 ```
 
-
 ```{r}
 #importing the mean ocean temperature
 dataset_id1 <- "thetao_ssp119_2020_2100_depthmean"
@@ -86,13 +85,12 @@ mixedlayerdepth <- download_layers(dataset_id7, variables, constraints)
 
 Can plot(variable) <- to see the current data
 
-----------------------------------------------------------------------------------------------
-
 ```{r}
 #reading the manta data 
 manta_data <- st_read("Data/manta_crs.shp")
 ```
 
+<<<<<<< Updated upstream
 ```{r}
 #cropping the mean temps to the manta data 
 terra::crop(mean_ocean_temp, manta_data)
@@ -109,38 +107,22 @@ mean_temp <- project(mean_ocean_temp,
                                  crs(manta_data))
 terra::crop(mean_ocean_temp, manta_data)
 temp = terra::extract(x = mean_ocean_temp,y = manta_data)
-```
 
-```{r}
 temp <- temp %>%
   filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
   dplyr::select("thetao_mean_2")
 ```
 
 ```{r}
-temp
-```
-
-
-
-
-```{r}
 mean_salinity <- project(salinity,
                                  crs(manta_data))
 terra::crop(salinity, manta_data)
 salinity = terra::extract(x = salinity,y = manta_data)
-```
 
-```{r}
 salinity <- salinity %>%
   filter(!is.na(so_mean_1) & !is.na(so_mean_2)) %>% 
   dplyr::select("so_mean_2")
 ```
-```{r}
-salinity
-```
-
-
 
 
 ```{r}
@@ -151,12 +133,13 @@ terra::crop(totalphytoplankton, manta_data)
 totalphytoplankton = terra::extract(x = totalphytoplankton,y = manta_data)
 ```
 
+
 ```{r}
 totalphytoplankton <- totalphytoplankton %>%
   filter(!is.na(phyc_mean_1) & !is.na(phyc_mean_2)) %>% 
   dplyr::select("phyc_mean_2")
-```
 
+```
 
 
 ```{r}
@@ -171,9 +154,8 @@ ph = terra::extract(x = ph,y = manta_data)
 ph <- ph %>%
   filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
   dplyr::select("ph_mean_2")
+
 ```
-
-
 
 ```{r}
 #setting the max ocean temp crs to be the same
@@ -190,6 +172,10 @@ chlorophyll <- chlorophyll %>%
 ```
 
 ```{r}
+ filter(!is.na(chl_mean_1) & !is.na(chl_mean_2))
+```
+
+```{r}
 #setting the max ocean temp crs to be the same
 mean_MixedLayerDepth <- project(MixedLayerDepth,
                                  crs(manta_data))
@@ -199,11 +185,7 @@ MixedLayerDepth = terra::extract(x = MixedLayerDepth,y = manta_data)
 
 ```{r}
 MixedLayerDepth <- MixedLayerDepth %>%
-  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2))
-```
-
-```{r}
-
+  filter(!is.na(mlotst_mean_1) & !is.na(mlotst_mean_2))
 ```
 
 ```{r}
