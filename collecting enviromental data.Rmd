@@ -90,7 +90,6 @@ Can plot(variable) <- to see the current data
 manta_data <- st_read("Data/manta_crs.shp")
 ```
 
-<<<<<<< Updated upstream
 ```{r}
 #cropping the mean temps to the manta data 
 terra::crop(mean_ocean_temp, manta_data)
