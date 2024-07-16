@@ -188,6 +188,26 @@ MixedLayerDepth <- MixedLayerDepth %>%
 ```
 
 ```{r}
+write.csv("Data/temp")
+```
+
+```{r}
+write.csv("Data/salinity")
+```
+
+```{r}
+write.csv("Data/totalphytoplankton")
+```
+
+```{r}
+write.csv("Data/ph")
+```
+
+```{r}
+write.csv("Data/ph")
+```
+
+```{r}
 temp_sf <- st_as_sf(temp, coords = c("longitude", "latitude"), crs = 4326)
 
 p1 <- ggplot(temp_sf) +
