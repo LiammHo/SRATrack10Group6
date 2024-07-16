@@ -87,18 +87,9 @@ Can plot(variable) <- to see the current data
 
 ```{r}
 #reading the manta data 
-manta_data <- st_read("Data/manta_crs.shp")
+manta_data <- st_read("Data/manta_csr.shp")
 ```
 
-```{r}
-#cropping the mean temps to the manta data 
-terra::crop(mean_ocean_temp, manta_data)
-```
-
-```{r}
-#cropping the salinity to the manta data 
-terra::crop(salinity, manta_data)
-```
 
 ```{r}
 #setting the max ocean temp crs to be the same
@@ -109,7 +100,8 @@ temp = terra::extract(x = mean_ocean_temp,y = manta_data)
 
 temp <- temp %>%
   filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
-  dplyr::select("thetao_mean_2")
+  dplyr::select("thetao_mean_2") %>% 
+  rename("thetao_mean2" = "mean_ocean_temp")
 ```
 
 ```{r}
@@ -120,71 +112,61 @@ salinity = terra::extract(x = salinity,y = manta_data)
 
 salinity <- salinity %>%
   filter(!is.na(so_mean_1) & !is.na(so_mean_2)) %>% 
-  dplyr::select("so_mean_2")
+  dplyr::select("so_mean_2") %>% 
+  rename("so_mean_2" = "mean_salinity")
 ```
 
 
 ```{r}
-#setting the max ocean temp crs to be the same
+#setting the mean total phytoplankton crs to be the same
 mean_totalphytoplankton <- project(totalphytoplankton,
                                  crs(manta_data))
 terra::crop(totalphytoplankton, manta_data)
 totalphytoplankton = terra::extract(x = totalphytoplankton,y = manta_data)
-```
 
-
-```{r}
 totalphytoplankton <- totalphytoplankton %>%
   filter(!is.na(phyc_mean_1) & !is.na(phyc_mean_2)) %>% 
-  dplyr::select("phyc_mean_2")
-
+  dplyr::select("phyc_mean_2") %>% 
+  rename("phyc_mean_2" = "mean_total_phytoplankton")
 ```
 
 
 ```{r}
-#setting the max ocean temp crs to be the same
+#setting the mean ph crs to be the same
 mean_ph <- project(ph,
                                  crs(manta_data))
 terra::crop(ph, manta_data)
 ph = terra::extract(x = ph,y = manta_data)
-```
-
-```{r}
 ph <- ph %>%
-  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
-  dplyr::select("ph_mean_2")
+  filter(!is.na(ph_mean_1) & !is.na(ph_mean_2)) %>% 
+  dplyr::select("ph_mean_2") %>% 
+  rename("ph_mean_2" = "mean_ph")
 
 ```
 
 ```{r}
-#setting the max ocean temp crs to be the same
+#setting the mean chlorophyll crs to be the same
 mean_chlorophyll <- project(chlorophyll,
                                  crs(manta_data))
 terra::crop(chlorophyll, manta_data)
 chlorophyll = terra::extract(x = chlorophyll,y = manta_data)
-```
-
-```{r}
 chlorophyll <- chlorophyll %>%
-  filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
-  dplyr::select("thetao_mean_2")
+  filter(!is.na(cl_mean_1) & !is.na(cl_mean_2)) %>% 
+  dplyr::select("thetao_mean_2") %>% 
+  rename("thetao_mean_2" = "mean_chlorophyll")
 ```
 
-```{r}
- filter(!is.na(chl_mean_1) & !is.na(chl_mean_2))
-```
 
 ```{r}
-#setting the max ocean temp crs to be the same
+#setting the Mixed Layer Depth crs to be the same
 mean_MixedLayerDepth <- project(MixedLayerDepth,
                                  crs(manta_data))
 terra::crop(MixedLayerDepth, manta_data)
 MixedLayerDepth = terra::extract(x = MixedLayerDepth,y = manta_data)
-```
-
-```{r}
 MixedLayerDepth <- MixedLayerDepth %>%
-  filter(!is.na(mlotst_mean_1) & !is.na(mlotst_mean_2))
+  filter(!is.na(mlotst_mean_1) & !is.na(mlotst_mean_2)) %>% 
+  dplyr::select("nlotst_mean_2") %>% 
+  rename("nlotst_mean_2" = "mean_MixedLayerDepth")
 ```
 
 ```{r}
@@ -204,7 +186,11 @@ write.csv("Data/ph")
 ```
 
 ```{r}
-write.csv("Data/ph")
+write.csv("Data/chlorophyll")
+```
+
+```{r}
+write.csv("Data/mean_MixedLayerDepth")
 ```
 
 ```{r}
