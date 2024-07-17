@@ -14,12 +14,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, messages = FALSE)
 library(tidyverse)
 library(sdmpredictors)
 library(raster)
-library(sp)
-library(terra)
-library(sf)
-library(stars)
+#library(sp)
+#library(sf)
 library(here)
-library(dplyr)
 ```
 
 ```{r}
@@ -99,12 +96,16 @@ terra::crop(mean_ocean_temp, manta_data)
 temp = terra::extract(x = mean_ocean_temp,y = manta_data)
 ```
 
-
+#Mean temperature 
 ```{r}
 temp <- temp %>%
   filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
+  dplyr::select("thetao_mean_2") %>% 
+  rename("thetao_mean_2" = "mean_temp")
 ```
 
+
+#Salinity
 ```{r}
 mean_salinity <- project(salinity,
                                  crs(manta_data))
@@ -118,6 +119,7 @@ salinity <- salinity %>%
 ```
 
 
+#Mean phytoplankton 
 ```{r}
 #setting the mean total phytoplankton crs to be the same
 mean_totalphytoplankton <- project(totalphytoplankton,
@@ -132,6 +134,7 @@ totalphytoplankton <- totalphytoplankton %>%
 ```
 
 
+#Mean pH
 ```{r}
 #setting the mean ph crs to be the same
 mean_ph <- project(ph,
@@ -145,6 +148,7 @@ ph <- ph %>%
 
 ```
 
+#Mean chlorophyll
 ```{r}
 #setting the mean chlorophyll crs to be the same
 mean_chlorophyll <- project(chlorophyll,
@@ -157,7 +161,7 @@ chlorophyll <- chlorophyll %>%
   rename("thetao_mean_2" = "mean_chlorophyll")
 ```
 
-
+#Mean Mixed Layer Depth
 ```{r}
 #setting the Mixed Layer Depth crs to be the same
 mean_MixedLayerDepth <- project(MixedLayerDepth,
@@ -170,6 +174,7 @@ MixedLayerDepth <- MixedLayerDepth %>%
   rename("nlotst_mean_2" = "mean_MixedLayerDepth")
 ```
 
+#Writing to the csv
 ```{r}
 write.csv("Data/temp.csv")
 ```
@@ -194,6 +199,7 @@ write.csv("Data/chlorophyll")
 write.csv("Data/mean_MixedLayerDepth")
 ```
 
+#IDK what is this 
 ```{r}
 temp_sf <- st_as_sf(temp, coords = c("longitude", "latitude"), crs = 4326)
 

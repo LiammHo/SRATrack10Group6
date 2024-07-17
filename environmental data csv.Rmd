@@ -39,8 +39,8 @@ Mixed_Layer_Depth<-read.csv("Data/MixedLayerDepth.csv", header = TRUE)
 
 ```{r}
 manta_complete <- read.csv("Data/manta_complete.csv") 
-manta_complete %>% 
-  slice(1:19485)
+#manta_complete %>% 
+  #slice(1:19485)
 #st_as_sf(model_data)
 ```
 
