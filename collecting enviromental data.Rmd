@@ -97,11 +97,14 @@ mean_temp <- project(mean_ocean_temp,
                                  crs(manta_data))
 terra::crop(mean_ocean_temp, manta_data)
 temp = terra::extract(x = mean_ocean_temp,y = manta_data)
+```
 
+
+```{r}
 temp <- temp %>%
   filter(!is.na(thetao_mean_1) & !is.na(thetao_mean_2)) %>% 
-  dplyr::select("thetao_mean_2") %>% 
-  rename("thetao_mean2" = "mean_ocean_temp")
+  rename("mean_ocean_temp2" = "thetao_mean_2") %>% 
+  rename("mean_ocean_temp1" = "thetao_mean1")
 ```
 
 ```{r}
@@ -170,11 +173,11 @@ MixedLayerDepth <- MixedLayerDepth %>%
 ```
 
 ```{r}
-write.csv("Data/temp")
+write.csv("Data/temp.csv")
 ```
 
 ```{r}
-write.csv("Data/salinity")
+write.csv("Data/salinity.csv")
 ```
 
 ```{r}
