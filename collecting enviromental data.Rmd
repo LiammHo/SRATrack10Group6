@@ -18,6 +18,7 @@ library(sp)
 library(sf)
 library(here)
 library(stringr)
+library(dbplyr)
 ```
 
 ```{r}
@@ -27,6 +28,53 @@ library(biooracler)
 dataset <- list_layers()
 dataset
 ```
+-----------------------------------------------------------------------------
+#Primary Productivity
+```{r}
+# Load the necessary libraries
+library(ncdf4)
+library(raster)
+library(terra)
+
+# Open the NetCDF file
+nc_file <- nc_open("Data/phyc_baseline_2000_2020_depthmean_7d39_02af_cdbd_U1721256162328.nc")
+
+# Print the details of the variables and dimensions
+print(nc_file)
+
+# Define latitude and longitude constraints
+latitude_range <- c(-89.975, 89.975)
+longitude_range <- c(-179.975, 179.975)
+
+# Get the latitude and longitude values from the NetCDF file
+latitudes <- ncvar_get(nc_file, "latitude") # Replace with the actual latitude variable name in your file
+longitudes <- ncvar_get(nc_file, "longitude") # Replace with the actual longitude variable name in your file
+
+# Find the indices that match the desired latitude and longitude ranges
+lat_idx <- which(latitudes >= latitude_range[1] & latitudes <= latitude_range[2])
+lon_idx <- which(longitudes >= longitude_range[1] & longitudes <= longitude_range[2])
+
+# Select the specific variable (replace 'phyc_mean' with your variable of interest)
+variable_name <- "phyc_mean"
+
+# Close the NetCDF file
+nc_close(nc_file)
+
+# Reverse the latitude indices to fix the upside-down issue
+variable_data <- variable_data[, rev(seq_len(ncol(variable_data)))]
+
+# Create a raster object from the variable data
+r <- raster(t(variable_data)) # Transpose the matrix to switch latitude and longitude
+
+# Assign the latitude and longitude values to the raster object
+extent(r) <- extent(min(longitudes[lon_idx]), max(longitudes[lon_idx]), min(latitudes[lat_idx]), max(latitudes[lat_idx]))
+
+# Convert the raster object to a SpatRaster object
+primary_productivity <- rast(r)
+```
+
+-----------------------------------------------------------------------------
+#Loading in everything else
 
 ```{r}
 latitude = c(-89.975, 89.975)
@@ -83,6 +131,9 @@ mixedlayerdepth <- download_layers(dataset_id7, variables, constraints)
 
 Can plot(variable) <- to see the current data
 
+-----------------------------------------------------------------------------
+#Reading in Manta Data + doing some changes
+
 ```{r}
 #reading the manta data (model data)
 manta_data <- st_read("Data/model_data.csv")
@@ -106,9 +157,9 @@ manta_data <- manta_data %>%
     latitude = geometry2
   )
 ```
-st_drop_geometry()
+
 ```{r}
-manta_data_sf <- st_as_sf(manta_data, coords = c("longitude", "latitude"), crs = "EPSG:4326")
+manta_data_sf <- st_as_sf(manta_data, coords = c("longitude", "latitude"), crs = "EPSG:4326") 
 ```
 
 ```{r}
@@ -124,8 +175,8 @@ manta_data_sf <- manta_data_sf %>%
 # Print the updated data frame
 print(manta_data_sf)
 ```
-
-#### mean temp 
+-----------------------------------------------------------------------------
+#Mean temperature
 
 ```{r}
 #setting the max ocean temp crs to be the same
@@ -134,108 +185,159 @@ mean_temp <- terra::project(mean_ocean_temp,
 terra::crop(mean_ocean_temp, manta_data_sf)
 temp = terra::extract(x = mean_ocean_temp,y = manta_data_sf)
 ```
-
-#Mean temperature 
 ```{r}
-temp_na <- temp %>%
-  filter(is.na(thetao_mean_1))
-#dplyr::select("thetao_mean_2") %>% 
-#rename("thetao_mean_2" = "mean_temp")
+# selecting just the 2010 - 2019 column and renaming it to mean_temp 
+temp_final <- temp %>%
+  dplyr::select("thetao_mean_2") %>% 
+  rename("mean_temp" = "thetao_mean_2")
 ```
 
-
+-----------------------------------------------------------------------------
 #Salinity
 ```{r}
 mean_salinity <- terra::project(salinity,
-                                 crs(manta_data))
-terra::crop(salinity, manta_data)
-salinity = terra::extract(x = salinity,y = manta_data)
-
-salinity <- salinity %>%
-  filter(!is.na(so_mean_1) & !is.na(so_mean_2)) %>% 
-  dplyr::select("so_mean_2") %>% 
-  rename("so_mean_2" = "mean_salinity")
+                                 crs(manta_data_sf))
+terra::crop(salinity, manta_data_sf)
+salinity = terra::extract(x = salinity,y = manta_data_sf)
 ```
 
+```{r}
+# selecting just the 2010 - 2019 column and renaming it to mean_temp 
+salinity_final <- salinity %>%
+  dplyr::select("so_mean_2") %>% 
+  rename("mean_salinity" = "so_mean_2")
+```
 
+-----------------------------------------------------------------------------
 #Mean phytoplankton 
 ```{r}
-#setting the mean total phytoplankton crs to be the same
 mean_totalphytoplankton <- terra::project(totalphytoplankton,
-                                 crs(manta_data))
-terra::crop(totalphytoplankton, manta_data)
-totalphytoplankton = terra::extract(x = totalphytoplankton,y = manta_data)
-
-totalphytoplankton <- totalphytoplankton %>%
-  filter(!is.na(phyc_mean_1) & !is.na(phyc_mean_2)) %>% 
-  dplyr::select("phyc_mean_2") %>% 
-  rename("phyc_mean_2" = "mean_total_phytoplankton")
+                                 crs(manta_data_sf))
+terra::crop(totalphytoplankton, manta_data_sf)
+totalphytoplankton = terra::extract(x = totalphytoplankton,y = manta_data_sf)
 ```
 
+```{r}
+# selecting just the 2010 - 2019 column and renaming it to mean_temp 
+totalphytoplankton_final <- totalphytoplankton %>%
+  dplyr::select("phyc_mean_2") %>% 
+  rename("mean_total_phytoplankton" = "phyc_mean_2")
+```
 
+-----------------------------------------------------------------------------
 #Mean pH
 ```{r}
-#setting the mean ph crs to be the same
-mean_ph <- project(ph,
-                                 crs(manta_data))
-terra::crop(ph, manta_data)
-ph = terra::extract(x = ph,y = manta_data)
-ph <- ph %>%
-  filter(!is.na(ph_mean_1) & !is.na(ph_mean_2)) %>% 
-  dplyr::select("ph_mean_2") %>% 
-  rename("ph_mean_2" = "mean_ph")
-
+mean_ph <- terra::project(ph,
+                          crs(manta_data_sf))
+terra::crop(ph, manta_data_sf)
+ph = terra::extract(x = ph,y = manta_data_sf)
 ```
 
+```{r}
+ph_final <- ph %>%
+  dplyr::select("ph_mean_2") %>% 
+  rename("mean_ph" = "ph_mean_2")
+```
+
+-----------------------------------------------------------------------------
 #Mean chlorophyll
 ```{r}
-#setting the mean chlorophyll crs to be the same
-mean_chlorophyll <- project(chlorophyll,
-                                 crs(manta_data))
-terra::crop(chlorophyll, manta_data)
-chlorophyll = terra::extract(x = chlorophyll,y = manta_data)
-chlorophyll <- chlorophyll %>%
-  filter(!is.na(cl_mean_1) & !is.na(cl_mean_2)) %>% 
-  dplyr::select("thetao_mean_2") %>% 
-  rename("thetao_mean_2" = "mean_chlorophyll")
+mean_chlorophyll <- terra::project(chlorophyll,
+                                 crs(manta_data_sf))
+terra::crop(chlorophyll, manta_data_sf)
+chlorophyll = terra::extract(x = chlorophyll,y = manta_data_sf)
 ```
 
+```{r}
+# selecting just the 2010 - 2019 column and renaming it to mean_temp 
+chlorophyll_final <- chlorophyll %>%
+   dplyr::select("chl_mean_2") %>% 
+  rename("mean_chlorophyll" = "chl_mean_2")
+```
+
+-----------------------------------------------------------------------------
 #Mean Mixed Layer Depth
 ```{r}
-#setting the Mixed Layer Depth crs to be the same
-mean_MixedLayerDepth <- project(MixedLayerDepth,
-                                 crs(manta_data))
-terra::crop(MixedLayerDepth, manta_data)
-MixedLayerDepth = terra::extract(x = MixedLayerDepth,y = manta_data)
-MixedLayerDepth <- MixedLayerDepth %>%
-  filter(!is.na(mlotst_mean_1) & !is.na(mlotst_mean_2)) %>% 
-  dplyr::select("nlotst_mean_2") %>% 
-  rename("nlotst_mean_2" = "mean_MixedLayerDepth")
+mean_mixedlayerdepth <- terra::project(mixedlayerdepth,
+                                 crs(manta_data_sf))
+terra::crop(mixedlayerdepth, manta_data_sf)
+mixedlayerdepth = terra::extract(x = mixedlayerdepth,y = manta_data_sf)
+
+print(mixedlayerdepth)
 ```
 
+```{r}
+# selecting just the 2010 - 2019 column and renaming it to mean_temp 
+mixedlayerdepth_final <- mixedlayerdepth %>%
+   dplyr::select("mlotst_mean_2") %>% 
+  rename("mean_MixedLayerDepth" = "mlotst_mean_2")
+```
+
+-----------------------------------------------------------------------------
+#Primary Productivity
+```{r}
+#setting the crs 
+crs(primary_productivity) <- "+proj=longlat +datum=WGS84 +no_defs"
+```
+
+```{r}
+mean_primary_productivity <- terra::project(primary_productivity,
+                                 crs(manta_data_sf))
+terra::crop(primary_productivity, manta_data_sf)
+primary_productivity = terra::extract(x = primary_productivity,y = manta_data_sf)
+
+print(primary_productivity)
+```
+
+```{r}
+# selecting just the 2010 - 2019 column and renaming it to mean_temp 
+primaryproductivity_final <- primary_productivity %>%
+  dplyr::select("layer") %>% 
+  rename("mean_PrimaryProductivity" = "layer")
+```
+
+-----------------------------------------------------------------------------
 #Writing to the csv
+  
 ```{r}
-write.csv("Data/temp.csv")
+write.csv(temp_final, "Data/temp_final.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv("Data/salinity.csv")
+write.csv(salinity_final, "Data/salinity_final.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv("Data/totalphytoplankton")
+write.csv(totalphytoplankton_final, "Data/totalphytoplankton_final.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv("Data/ph")
+write.csv(ph_final, "Data/ph_final.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv("Data/chlorophyll")
+write.csv(chlorophyll_final, "Data/chlorophyll_final.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv("Data/mean_MixedLayerDepth")
+write.csv(mixedlayerdepth_final, "Data/MixedLayerDepth_final.csv", row.names = FALSE)
+```
+
+```{r}
+write.csv(primaryproductivity_final , "Data/primaryproductivity_final.csv", row.names = FALSE)
+```
+
+
+```{r}
+manta_data_sf_drop <- manta_data_sf %>%
+  dplyr::select("X", "longitude", "latitude") %>% 
+  rename("occurrences" = "X")
+
+```
+
+
+```{r}
+write.csv(manta_data_sf_drop, "Data/manta_final.csv", row.names = FALSE)
 ```
 
 #IDK what is this 
