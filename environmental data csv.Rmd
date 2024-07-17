@@ -12,34 +12,30 @@ library(here)
 library(readr)
 ```
 ```{r}
-read.csv("Data/meanoceantemp.csv")
+mean_ocean_temp <- read.csv("Data/meanoceantemp.csv", header = TRUE)
 ```
 
 ```{r}
-read.csv("Data/salinity2.csv")
+salinity <- read.csv("Data/salinity2.csv", header = TRUE)
 ```
 
 ```{r}
-read.csv("Data/totalphytoplankton.csv")
+totalphytoplankton <- read.csv("Data/totalphytoplankton.csv", header = TRUE)
 ```
 
 ```{r}
-read.csv("Data/ph.csv")
+ph <- read.csv("Data/ph.csv", header = TRUE)
 ```
 
 ```{r}
-read.csv("Data/chlorophyll.csv")
+chlorophyll <- read.csv("Data/chlorophyll.csv", header = TRUE)
 ```
 
 ```{r}
-read.csv("Data/MixedLayerDepth.csv")
+Mixed_Layer_Depth<-read.csv("Data/MixedLayerDepth.csv", header = TRUE)
 ```
 ```{r}
-environmental_factors <- list.files(path=c("Data/saliniy2.csv", "Data/chlorophyll"), full.names = TRUE) %>% 
-  lapply(read_csv) %>% 
-  bind_rows
+combined_data <- cbind(mean_ocean_temp, Mixed_Layer_Depth, salinity, totalphytoplankton, ph, chlorophyll)
 ```
-```{r}
-?lapply
-```
+
 
