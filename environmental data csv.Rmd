@@ -34,6 +34,12 @@ chlorophyll <- read.csv("Data/chlorophyll.csv", header = TRUE)
 ```{r}
 Mixed_Layer_Depth<-read.csv("Data/MixedLayerDepth.csv", header = TRUE)
 ```
+
+```{r}
+#model_data <- read.csv("Data/model_data.csv")
+#st_as_sf(model_data)
+```
+
 ```{r}
 combined_data <- cbind(mean_ocean_temp, Mixed_Layer_Depth, salinity, totalphytoplankton, ph, chlorophyll)
 ```
