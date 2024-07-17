@@ -15,6 +15,7 @@ library(tidyverse)
 library(sf)
 library(terra)
 library(biooracler)
+library(readr)
 ```
 
 ```{r}
@@ -81,12 +82,11 @@ model_data = rbind(random_points, manta_data)%>%
   st_as_sf() %>% 
   as.data.frame(xy = TRUE)
 
-write_csv()
+write.csv(model_data, file = "model_data.csv", row.names = FALSE)
 
-ggplot(model_data) +
-  geom_sf(aes(color = occurrenceStatus)) +
-  theme_bw()
-
+#ggplot(model_data) +
+  #geom_sf(aes(color = occurrenceStatus)) +
+  #theme_bw()
 ```
 
 
