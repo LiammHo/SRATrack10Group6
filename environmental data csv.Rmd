@@ -38,11 +38,19 @@ Mixed_Layer_Depth<-read.csv("Data/MixedLayerDepth.csv", header = TRUE)
 ```
 
 ```{r}
+<<<<<<< Updated upstream
 model_data <- read.csv("Data/model_data.csv", stringsAsFactors = FALSE)
+=======
+manta_complete <- read.csv("Data/manta_complete.csv") 
+manta_complete %>% 
+  slice(1:19485)
+#st_as_sf(model_data)
+>>>>>>> Stashed changes
 ```
 
+
 ```{r}
-combined_data <- cbind(mean_ocean_temp, Mixed_Layer_Depth, salinity, totalphytoplankton, ph, chlorophyll)
+combined_data <- cbind(mean_ocean_temp, Mixed_Layer_Depth, salinity, totalphytoplankton, ph, chlorophyll, manta_complete)
 ```
 
 
