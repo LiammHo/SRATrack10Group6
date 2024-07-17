@@ -82,13 +82,19 @@ model_data = rbind(random_points, manta_data)%>%
   st_as_sf() %>% 
   as.data.frame(xy = TRUE)
 
-write.csv(model_data, file = "model_data.csv", row.names = FALSE)
+occurrence_status_data <- model_data %>%
+  select(occurrenceStatus)
+
+print(occurrence_status_data)
 
 #ggplot(model_data) +
   #geom_sf(aes(color = occurrenceStatus)) +
   #theme_bw()
 ```
 
+```{r}
+write.csv(occurrence_status_data, file = "occurrence_status.csv", row.names = FALSE)
+```
 
 
 

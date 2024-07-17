@@ -10,7 +10,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, messages = FALSE)
 library(tidyverse)
 library(here)
 library(readr)
+library(sf)
 ```
+
 ```{r}
 mean_ocean_temp <- read.csv("Data/meanoceantemp.csv", header = TRUE)
 ```
@@ -36,8 +38,7 @@ Mixed_Layer_Depth<-read.csv("Data/MixedLayerDepth.csv", header = TRUE)
 ```
 
 ```{r}
-#model_data <- read.csv("Data/model_data.csv")
-#st_as_sf(model_data)
+model_data <- read.csv("Data/model_data.csv", stringsAsFactors = FALSE)
 ```
 
 ```{r}
