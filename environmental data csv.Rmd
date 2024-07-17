@@ -1,0 +1,45 @@
+---
+title: "Combining csv files"
+author: "Ivy Zhou"
+date: "2024-07-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, messages = FALSE)
+library(tidyverse)
+library(here)
+library(readr)
+```
+```{r}
+read.csv("Data/meanoceantemp.csv")
+```
+
+```{r}
+read.csv("Data/salinity2.csv")
+```
+
+```{r}
+read.csv("Data/totalphytoplankton.csv")
+```
+
+```{r}
+read.csv("Data/ph.csv")
+```
+
+```{r}
+read.csv("Data/chlorophyll.csv")
+```
+
+```{r}
+read.csv("Data/MixedLayerDepth.csv")
+```
+```{r}
+environmental_factors <- list.files(path=c("Data/saliniy2.csv", "Data/chlorophyll"), full.names = TRUE) %>% 
+  lapply(read_csv) %>% 
+  bind_rows
+```
+```{r}
+?lapply
+```
+
