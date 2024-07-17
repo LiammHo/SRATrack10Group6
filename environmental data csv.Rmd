@@ -49,4 +49,3 @@ manta_complete <- read.csv("Data/manta_complete.csv")
 combined_data <- cbind(mean_ocean_temp, Mixed_Layer_Depth, salinity, totalphytoplankton, ph, chlorophyll, manta_complete)
 ```
 
-
