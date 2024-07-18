@@ -9,105 +9,190 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
                       warning = FALSE)
-library(tidyverse)
-library(tidymodels)
-library(here)
-library(nnet)
-library(readr)
 
+library(tidymodels)  
 
-set.seed(42)
+# Helper packages
+library(readr)       # for importing data
+library(vip)         # for variable importance plots
 ```
 
 ```{r}
-final_data <- read.csv("Data/combined_data_final.csv")
-```
-```{r}
-final_manta <- final_data %>% 
-  mutate(mean_temp = as.numeric(mean_temp),
-         mean_MixedLayerDepth = as.numeric(mean_MixedLayerDepth),
-         mean_PrimaryProductivity = as.numeric(mean_PrimaryProductivity),
-         mean_salinity = as.numeric(mean_salinity),
-         mean_total_phytoplankton = as.numeric(mean_total_phytoplankton),
-         mean_ph = as.numeric(mean_ph),
-         mean_chlorophyll = as.numeric(mean_chlorophyll))
+#importing the data
+final_data <- read.csv("Data/combined_data_final.csv") %>%
+  mutate(across(where(is.character), as.factor))
 
-write.csv(final_manta, "Data/combined_data_final2.csv", row.names = FALSE)
-```
-
-
-
-```{r}
-#reading in the data 
-manta_clean = read_csv(here("Data/combined_data_final2.csv")) %>% 
-  mutate(habitat = as.factor(occurrences)) %>% 
-  distinct() # remove duplicates
-
-#training and testing the data
-data_split = initial_split(manta_clean, prop = 0.75, strata = occurrences)
-train = training(data_split)
-test = testing(data_split)
-
-head(train)
+dim(final_data)
 ```
 
 ```{r}
-#creating a 5-fold
-cv_folds = vfold_cv(train, v = 5)
+#looking at our final data and what it contains
+glimpse(final_data)
+
+final_data %>% 
+  count(occurrences) %>% 
+  mutate(prop = n/sum(n))
+```
+```{r}
+set.seed(123)
+
+splits <- initial_split(final_data, strata = occurrences)
+
+manta_train <- training(splits)
+manta_test <- testing(splits)
 ```
 
 ```{r}
-train$occurrences <- factor(train$occurrences)
+# training set proportions by children
+manta_train %>% 
+  count(occurrences) %>% 
+  mutate(prop = n/sum(n))
 
-logistic <- logistic_reg(mixture = double(1), penalty = double(1)) %>%
-  set_engine("glmnet") %>%
-  set_mode("classification") %>%
-  fit(occurrences ~ ., data = train)
-
-# Model summary
-tidy(logistic)
+# test set proportions by children
+manta_test  %>% 
+  count(occurrences) %>% 
+  mutate(prop = n/sum(n))
 ```
-
-
-
-Logistic regression model 
 ```{r}
-multinom_model = multinom_reg(penalty = tune()) %>%
-  set_engine("nnet") %>%
-  set_mode("classification")
-```
+set.seed(234)
+val_set <- validation_split(manta_train, 
+                            strata = occurrences, 
+                            prop = 0.80)
 
-```{r}
-#creating a workflow
-multinom_workflow = workflow() %>%
-  add_model(multinom_model) %>%
-  add_recipe(manta_recipe)
-multinom_workflow
-```
-
-
-```{r}
-#tuning the logistic regression
-multinom_cv_tune = tune_grid(multinom_workflow, resamples = cv_folds, grid = 10)
-
-# Save the tuning results
-save(multinom_cv_tune, file = here::here("Data", "logistic_tune.rda"))
-```
-
-
-```{r}
-load(file = here::here("Data/logistic_tune.rda"))
+val_set
 ```
 
 ```{r}
-# Collect and display the metrics from tuning
-metrics = collect_metrics(multinom_cv_tune)
-print(metrics)
-
-# Plot the tuning results
-autoplot(multinom_cv_tune) +
-  theme_bw()
+lr_mod <- 
+  logistic_reg(penalty = tune(), mixture = 1) %>% 
+  set_engine("glmnet")
 ```
+
+```{r}
+lr_recipe <- 
+  recipe(occurrences ~ mean_temp + mean_MixedLayerDepth + mean_PrimaryProductivity + mean_salinity + mean_total_phytoplankton + mean_ph + mean_chlorophyll, data = manta_train) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
+  step_zv(all_predictors()) %>% 
+  step_normalize(all_predictors())
+```
+
+```{r}
+lr_workflow <- 
+  workflow() %>% 
+  add_model(lr_mod) %>% 
+  add_recipe(lr_recipe)
+```
+
+```{r}
+lr_reg_grid <- tibble(penalty = 10^seq(-4, -1, length.out = 30))
+
+lr_reg_grid %>% top_n(-5) # lowest penalty values
+lr_reg_grid %>% top_n(5)  # highest penalty values
+```
+
+```{r}
+lr_res <- 
+  lr_workflow %>% 
+  tune_grid(val_set,
+            grid = lr_reg_grid,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(roc_auc))
+```
+
+```{r}
+lr_plot <- 
+  lr_res %>% 
+  collect_metrics() %>% 
+  ggplot(aes(x = penalty, y = mean)) + 
+  geom_point() + 
+  geom_line() + 
+  ylab("Area under the ROC Curve") +
+  scale_x_log10(labels = scales::label_number())
+
+lr_plot 
+```
+
+```{r}
+top_models <-
+  lr_res %>% 
+  show_best(metric = "roc_auc", n = 1) %>% 
+  arrange(penalty) 
+
+top_model <- finalize_workflow(lr_workflow, select_best(lr_res, metric = "roc_auc"))
+
+```
+
+```{r}
+lr_best <- 
+  lr_res %>% 
+  collect_metrics() %>% 
+  arrange(penalty) %>% 
+  slice(12)
+lr_best
+```
+
+
+```{r}
+lr_auc <- 
+  lr_res %>% 
+  collect_predictions(parameters = lr_best) %>% 
+  roc_curve(occurrences, .pred_ABSENT) %>% 
+  mutate(model = "Logistic Regression")
+
+autoplot(lr_auc)
+```
+
+```{r}
+auc <- lr_res %>% 
+  collect_predictions(parameters = lr_best) %>% 
+  roc_auc(truth = occurrences, .pred_ABSENT)
+
+print(auc)
+```
+
+```{r}
+model_fit <- fit(top_model, manta_train)
+
+# predict on the training data
+train_predict <- predict(object = model_fit, new_data = manta_train) %>% 
+  bind_cols(manta_train)
+
+# predict on the testing data
+test_predict <- predict(object = model_fit, new_data = manta_test) %>%
+  bind_cols(manta_test)
+```
+
+```{r}
+train_metrics <- train_predict %>% 
+  metrics(occurrences, .pred_class)
+
+test_metrics <- test_predict %>% 
+  metrics(occurrences, .pred_class)
+```
+
+
+```{r}
+train_metrics
+
+test_metrics
+```
+
+```{r}
+# getting the importance of each predictor variable
+model_fit %>% 
+  extract_fit_parsnip() %>% 
+  vip()
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
