@@ -6,5 +6,109 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+library(tidyverse)
+library(tidymodels)
+library(here)
+library(nnet)
+library(readr)
+
+
+set.seed(42)
 ```
+
+```{r}
+final_data <- read.csv("Data/combined_data_final.csv")
+```
+```{r}
+final_manta <- final_data %>% 
+  mutate(mean_temp = as.numeric(mean_temp),
+         mean_MixedLayerDepth = as.numeric(mean_MixedLayerDepth),
+         mean_PrimaryProductivity = as.numeric(mean_PrimaryProductivity),
+         mean_salinity = as.numeric(mean_salinity),
+         mean_total_phytoplankton = as.numeric(mean_total_phytoplankton),
+         mean_ph = as.numeric(mean_ph),
+         mean_chlorophyll = as.numeric(mean_chlorophyll))
+
+write.csv(final_manta, "Data/combined_data_final2.csv", row.names = FALSE)
+```
+
+
+
+```{r}
+#reading in the data 
+manta_clean = read_csv(here("Data/combined_data_final2.csv")) %>% 
+  mutate(habitat = as.factor(occurrences)) %>% 
+  distinct() # remove duplicates
+
+#training and testing the data
+data_split = initial_split(manta_clean, prop = 0.75, strata = occurrences)
+train = training(data_split)
+test = testing(data_split)
+
+head(train)
+```
+
+```{r}
+#creating a 5-fold
+cv_folds = vfold_cv(train, v = 5)
+```
+
+```{r}
+train$occurrences <- factor(train$occurrences)
+
+logistic <- logistic_reg(mixture = double(1), penalty = double(1)) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification") %>%
+  fit(occurrences ~ ., data = train)
+
+# Model summary
+tidy(logistic)
+```
+
+
+
+Logistic regression model 
+```{r}
+multinom_model = multinom_reg(penalty = tune()) %>%
+  set_engine("nnet") %>%
+  set_mode("classification")
+```
+
+```{r}
+#creating a workflow
+multinom_workflow = workflow() %>%
+  add_model(multinom_model) %>%
+  add_recipe(manta_recipe)
+multinom_workflow
+```
+
+
+```{r}
+#tuning the logistic regression
+multinom_cv_tune = tune_grid(multinom_workflow, resamples = cv_folds, grid = 10)
+
+# Save the tuning results
+save(multinom_cv_tune, file = here::here("Data", "logistic_tune.rda"))
+```
+
+
+```{r}
+load(file = here::here("Data/logistic_tune.rda"))
+```
+
+```{r}
+# Collect and display the metrics from tuning
+metrics = collect_metrics(multinom_cv_tune)
+print(metrics)
+
+# Plot the tuning results
+autoplot(multinom_cv_tune) +
+  theme_bw()
+```
+
+
+
+
