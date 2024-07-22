@@ -1,0 +1,42 @@
+---
+title: "Zooplankton data CRS change"
+author: "Ivy Zhou"
+date: "2024-07-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, messages = FALSE)
+library(sf)
+library(here)
+library(tidyverse)
+library(terra)
+```
+
+```{r}
+Zooplankton_data<-read.csv("Data/zooplankton.csv")
+manta_data <- st_read("Data/model_data.csv")
+```
+
+```{r}
+Zooplankton_sf<-st_as_sf(Zooplankton_data, coords = c("latitude", "longitde"), crs = "manta_data_sf")
+reference_manta <- st_crs(manta_data_sf)
+projected_zooplankton <- terra::project(Zooplankton_sf, reference_manta)
+```
+```{r}
+manta_data
+```
+
+```{r}
+Zooplankton <- terra::project(Zooplankton_sf, manta_data_sf)
+#terra::crop(Zooplankton, model_data)
+#Zooplankton1 = terra::extract(x = Zooplankton,y = manta_data)
+
+#totalZooplankton <- totalZooplankton %>%
+  #dplyr::select("phyc_mean_2") %>% 
+ # rename("phyc_mean_2" = "mean_total_phytoplankton")
+```
+```{r}
+?project
+```
+

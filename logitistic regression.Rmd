@@ -43,12 +43,12 @@ manta_test <- testing(splits)
 ```
 
 ```{r}
-# training set proportions by children
+# training set proportions by occurrences
 manta_train %>% 
   count(occurrences) %>% 
   mutate(prop = n/sum(n))
 
-# test set proportions by children
+# test set proportions by occurrences
 manta_test  %>% 
   count(occurrences) %>% 
   mutate(prop = n/sum(n))
@@ -105,11 +105,11 @@ lr_plot <-
   collect_metrics() %>% 
   ggplot(aes(x = penalty, y = mean)) + 
   geom_point() + 
-  geom_line() + 
+  geom_line(color = "blue") + 
   ylab("Area under the ROC Curve") +
   scale_x_log10(labels = scales::label_number())
 
-lr_plot 
+lr_plot
 ```
 
 ```{r}
@@ -122,6 +122,7 @@ top_model <- finalize_workflow(lr_workflow, select_best(lr_res, metric = "roc_au
 
 ```
 
+
 ```{r}
 lr_best <- 
   lr_res %>% 
@@ -130,6 +131,8 @@ lr_best <-
   slice(12)
 lr_best
 ```
+
+
 
 
 ```{r}
@@ -141,6 +144,7 @@ lr_auc <-
 
 autoplot(lr_auc)
 ```
+
 
 ```{r}
 auc <- lr_res %>% 
@@ -179,13 +183,23 @@ test_metrics
 
 ```{r}
 # getting the importance of each predictor variable
-model_fit %>% 
+Importance<- model_fit %>% 
   extract_fit_parsnip() %>% 
-  vip()
+  vip(aesthetics = list(fill = "skyblue"))+
+  theme_bw()
+Importance
 ```
 
 
 
+```{r}
+test_predict %>% 
+  conf_mat(truth = occurrences, estimate = .pred_class) %>% 
+  autoplot(type = "heatmap") + 
+  theme_minimal() +
+  labs(title = "Confidence Matrix")+
+  scale_fill_gradient(low="#D6EAF8",high = "#2E86C1")
+```
 
 
 
