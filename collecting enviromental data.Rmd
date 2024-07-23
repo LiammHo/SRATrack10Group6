@@ -28,50 +28,6 @@ library(biooracler)
 dataset <- list_layers()
 dataset
 ```
------------------------------------------------------------------------------
-#Primary Productivity
-```{r}
-# Load the necessary libraries
-library(ncdf4)
-library(raster)
-library(terra)
-
-# Open the NetCDF file
-nc_file <- nc_open("Data/phyc_baseline_2000_2020_depthmean_7d39_02af_cdbd_U1721256162328.nc")
-
-# Print the details of the variables and dimensions
-print(nc_file)
-
-# Define latitude and longitude constraints
-latitude_range <- c(-89.975, 89.975)
-longitude_range <- c(-179.975, 179.975)
-
-# Get the latitude and longitude values from the NetCDF file
-latitudes <- ncvar_get(nc_file, "latitude") # Replace with the actual latitude variable name in your file
-longitudes <- ncvar_get(nc_file, "longitude") # Replace with the actual longitude variable name in your file
-
-# Find the indices that match the desired latitude and longitude ranges
-lat_idx <- which(latitudes >= latitude_range[1] & latitudes <= latitude_range[2])
-lon_idx <- which(longitudes >= longitude_range[1] & longitudes <= longitude_range[2])
-
-# Select the specific variable (replace 'phyc_mean' with your variable of interest)
-variable_name <- "phyc_mean"
-
-# Close the NetCDF file
-nc_close(nc_file)
-
-# Reverse the latitude indices to fix the upside-down issue
-variable_data <- variable_data[, rev(seq_len(ncol(variable_data)))]
-
-# Create a raster object from the variable data
-r <- raster(t(variable_data)) # Transpose the matrix to switch latitude and longitude
-
-# Assign the latitude and longitude values to the raster object
-extent(r) <- extent(min(longitudes[lon_idx]), max(longitudes[lon_idx]), min(latitudes[lat_idx]), max(latitudes[lat_idx]))
-
-# Convert the raster object to a SpatRaster object
-primary_productivity <- rast(r)
-```
 
 -----------------------------------------------------------------------------
 #Loading in everything else
@@ -175,9 +131,11 @@ manta_data_sf <- manta_data_sf %>%
 # Print the updated data frame
 print(manta_data_sf)
 ```
+
+
+
 -----------------------------------------------------------------------------
 #Mean temperature
-
 ```{r}
 #setting the max ocean temp crs to be the same
 mean_temp <- terra::project(mean_ocean_temp,
@@ -185,6 +143,7 @@ mean_temp <- terra::project(mean_ocean_temp,
 terra::crop(mean_ocean_temp, manta_data_sf)
 temp = terra::extract(x = mean_ocean_temp,y = manta_data_sf)
 ```
+
 ```{r}
 # selecting just the 2010 - 2019 column and renaming it to mean_temp 
 temp_final <- temp %>%
@@ -274,71 +233,53 @@ mixedlayerdepth_final <- mixedlayerdepth %>%
 ```
 
 -----------------------------------------------------------------------------
-#Primary Productivity
-```{r}
-#setting the crs 
-crs(primary_productivity) <- "+proj=longlat +datum=WGS84 +no_defs"
-```
-
-```{r}
-mean_primary_productivity <- terra::project(primary_productivity,
-                                 crs(manta_data_sf))
-terra::crop(primary_productivity, manta_data_sf)
-primary_productivity = terra::extract(x = primary_productivity,y = manta_data_sf)
-
-print(primary_productivity)
-```
-
-```{r}
-# selecting just the 2010 - 2019 column and renaming it to mean_temp 
-primaryproductivity_final <- primary_productivity %>%
-  dplyr::select("layer") %>% 
-  rename("mean_PrimaryProductivity" = "layer")
-```
-
------------------------------------------------------------------------------
 #Writing to the csv
   
 ```{r}
-write.csv(temp_final, "Data/temp_final.csv", row.names = FALSE)
+write.csv(temp_final, "Data/temp_final2.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv(salinity_final, "Data/salinity_final.csv", row.names = FALSE)
+write.csv(salinity_final, "Data/salinity_final2.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv(totalphytoplankton_final, "Data/totalphytoplankton_final.csv", row.names = FALSE)
+write.csv(totalphytoplankton_final, "Data/totalphytoplankton_final2.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv(ph_final, "Data/ph_final.csv", row.names = FALSE)
+write.csv(ph_final, "Data/ph_final2.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv(chlorophyll_final, "Data/chlorophyll_final.csv", row.names = FALSE)
+write.csv(chlorophyll_final, "Data/chlorophyll_final2.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv(mixedlayerdepth_final, "Data/MixedLayerDepth_final.csv", row.names = FALSE)
+write.csv(mixedlayerdepth_final, "Data/MixedLayerDepth_final2.csv", row.names = FALSE)
 ```
 
 ```{r}
-write.csv(primaryproductivity_final , "Data/primaryproductivity_final.csv", row.names = FALSE)
+manta_data_sf_drop2 <- manta_data_sf %>%
+  dplyr::select("occurrenceStatus", "longitude", "latitude") %>% 
+  rename("occurrences" = "occurrenceStatus")
+
 ```
 
-
+#don't even know how this code works but it dropped geometry
 ```{r}
-manta_data_sf_drop <- manta_data_sf %>%
-  dplyr::select("X", "longitude", "latitude") %>% 
-  rename("occurrences" = "X")
+library(dplyr)
+library(sf)
 
+# Convert to data frame to drop geometry column
+manta_data_sf_drop2 <- as.data.frame(manta_data_sf) %>%
+  dplyr::select(occurrenceStatus, longitude, latitude) %>%
+  rename(occurrences = occurrenceStatus)
+
+# Saving the modified data frame to a CSV file
+write.csv(manta_data_sf_drop2, "Data/manta_final.csv", row.names = FALSE)
 ```
 
-
-```{r}
-write.csv(manta_data_sf_drop, "Data/manta_final.csv", row.names = FALSE)
-```
 
 #IDK what is this 
 ```{r}
@@ -359,4 +300,3 @@ print(p1)
 glm(formula = present ~ tmin + precip, family = binomial(link = "logit"), 
      data = hooded_warb_data)
 ```
-

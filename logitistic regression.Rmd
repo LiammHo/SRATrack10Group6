@@ -19,11 +19,26 @@ library(vip)         # for variable importance plots
 
 ```{r}
 #importing the data
-final_data <- read.csv("Data/combined_data_final.csv") %>%
+final_data <- read.csv("Data/combined_data_final2.csv") %>%
   mutate(across(where(is.character), as.factor))
 
 dim(final_data)
 ```
+
+# taking out primary productivity
+```{r}
+library(dplyr)
+
+# Importing the data
+final_data <- read.csv("Data/combined_data_final2.csv") %>%
+  dplyr::select(-mean_PrimaryProductivity) %>% # Exclude the column
+  mutate(across(where(is.character), as.factor))
+
+# Check the dimensions of the modified data
+dim(final_data)
+
+```
+
 
 ```{r}
 #looking at our final data and what it contains
@@ -70,7 +85,7 @@ lr_mod <-
 
 ```{r}
 lr_recipe <- 
-  recipe(occurrences ~ mean_temp + mean_MixedLayerDepth + mean_PrimaryProductivity + mean_salinity + mean_total_phytoplankton + mean_ph + mean_chlorophyll, data = manta_train) %>% 
+  recipe(occurrences ~ mean_temp + mean_MixedLayerDepth + mean_salinity + mean_total_phytoplankton + mean_ph + mean_chlorophyll, data = manta_train) %>% 
   step_dummy(all_nominal_predictors()) %>% 
   step_zv(all_predictors()) %>% 
   step_normalize(all_predictors())
@@ -181,14 +196,36 @@ train_metrics
 test_metrics
 ```
 
+
+
 ```{r}
-# getting the importance of each predictor variable
-Importance<- model_fit %>% 
-  extract_fit_parsnip() %>% 
-  vip(aesthetics = list(fill = "skyblue"))+
-  theme_bw()
-Importance
+library(ggplot2)
+library(vip)
+library(dplyr)
+
+# Rename and reorder the variables in the data
+Importance_data <- model_fit %>%
+  extract_fit_parsnip() %>%
+  vip::vi() %>%
+  mutate(Variable = recode(Variable,
+                           "mean_temp" = "Temperature", 
+                           "mean_MixedLayerDepth" = "Depth", 
+                           "mean_total_phytoplankton" = "Phytoplankton", 
+                           "mean_salinity" = "Salinity", 
+                           "mean_chlorophyll" = "Chlorophyll", 
+                           "mean_ph" = "pH")) %>%
+  mutate(Variable = factor(Variable, levels = Variable[order(Importance, decreasing = TRUE)]))
+
+# Plot with the renamed and reordered variables
+Importance_plot <- ggplot(Importance_data, aes(x = Importance, y = Variable)) +
+  geom_col(fill = "skyblue") +
+  theme_bw() +
+  scale_y_discrete(limits = rev(levels(Importance_data$Variable)))  # Flip the y-axis order
+
+Importance_plot
+
 ```
+
 
 
 
@@ -197,8 +234,58 @@ test_predict %>%
   conf_mat(truth = occurrences, estimate = .pred_class) %>% 
   autoplot(type = "heatmap") + 
   theme_minimal() +
-  labs(title = "Confidence Matrix")+
+  labs(title = "Confusion Matrix")+
   scale_fill_gradient(low="#D6EAF8",high = "#2E86C1")
+```
+```{r}
+# Load necessary libraries
+library(sf)
+library(dplyr)
+
+# Read the shapefile
+sdm_points <- st_read("Data/sdm_points_group6.shp")
+
+# Display the current column names to understand what needs to be renamed
+names(sdm_points)
+
+# Rename columns to match the required names
+# Adjust the current column names based on your actual data
+sdm_points <- sdm_points %>%
+  rename(
+    mean_temp = thet_mn,
+    mean_MixedLayerDepth = mltst_m,
+    mean_salinity = so_mean,
+    mean_total_phytoplankton = phyc_mn,
+    mean_ph = ph_mean,
+    mean_chlorophyll = chl_men
+  )
+
+# Ensure the new column names are correct
+names(sdm_points)
+
+# Assuming model_fit is your trained model and sdm_points is your dataset with coordinates
+predictions <- predict(model_fit, sdm_points, type = "prob") %>% 
+  bind_cols(sdm_points)
+
+# Convert your prediction dataset into an SF object if it's not already
+# This step ensures that the data is in the correct format for spatial operations
+predictions_sf <- predictions %>%
+  st_as_sf(coords = c("lon", "lat"))
+
+# Replace ".pred_PRESENT" with the actual column name that has your probability of occurrence
+random_rast <- predictions_sf %>%
+  select(.pred_PRESENT) %>%
+  st_rasterize() %>%
+  aggregate(FUN = mean, by = predictions_sf) %>%
+  as.data.frame(xy = TRUE) %>%
+  st_as_sf()
+
+# Plotting the results
+ggplot() +
+  geom_sf(data = random_rast, aes(color = .pred_PRESENT)) +
+  theme_minimal() +
+  labs(title = "Predicted Probabilities", color = "Probability")
+
 ```
 
 

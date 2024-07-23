@@ -14,35 +14,31 @@ library(sf)
 ```
 
 ```{r}
-temp_final <- read.csv("Data/temp_final.csv", header = TRUE)
+temp_final <- read.csv("Data/temp_final2.csv", header = TRUE)
 ```
 
 ```{r}
-salinity_final <- read.csv("Data/salinity_final.csv", header = TRUE)
+salinity_final <- read.csv("Data/salinity_final2.csv", header = TRUE)
 ```
 
 ```{r}
-totalphytoplankton_final <- read.csv("Data/totalphytoplankton_final.csv", header = TRUE)
+totalphytoplankton_final <- read.csv("Data/totalphytoplankton_final2.csv", header = TRUE)
 ```
 
 ```{r}
-ph_final <- read.csv("Data/ph_final.csv", header = TRUE)
+ph_final <- read.csv("Data/ph_final2.csv", header = TRUE)
 ```
 
 ```{r}
-chlorophyll_final <- read.csv("Data/chlorophyll_final.csv", header = TRUE)
+chlorophyll_final <- read.csv("Data/chlorophyll_final2.csv", header = TRUE)
 ```
 
 ```{r}
-mixedlayerdepth_final <-read.csv("Data/mixedlayerdepth_final.csv", header = TRUE)
+mixedlayerdepth_final <-read.csv("Data/mixedlayerdepth_final2.csv", header = TRUE)
 ```
 
 ```{r}
-primaryproductivity_final <-read.csv("Data/primaryproductivity_final.csv", header = TRUE)
-```
-
-```{r}
-manta_data_sf <- read.csv("Data/manta_final.csv") 
+manta_data_sf <- read.csv("Data/manta_final.csv2") 
 #manta_complete %>% 
   #slice(1:19485)
 #st_as_sf(model_data)
@@ -50,12 +46,12 @@ manta_data_sf <- read.csv("Data/manta_final.csv")
 
 
 ```{r}
-combined_data <- cbind(temp_final, mixedlayerdepth_final, primaryproductivity_final, salinity_final, totalphytoplankton_final, ph_final, chlorophyll_final, manta_data_sf)
+combined_data <- cbind(temp_final, mixedlayerdepth_final, salinity_final, totalphytoplankton_final, ph_final, chlorophyll_final, manta_data_sf)
 ```
 
 
 ```{r}
 combined_data <- na.omit(combined_data)
 
-write.csv(combined_data, "Data/combined_data_final.csv", row.names = FALSE)
+write.csv(combined_data, "Data/combined_data_final_final.csv", row.names = FALSE)
 ```
